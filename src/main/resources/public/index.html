@@ -16,7 +16,7 @@
           let decodedRef = decodeURIComponent(atob(`${ref}`))
 
           let lastIndexOfColon = decodedRef.lastIndexOf('"');
-          newDecodedRef= decodedRef.slice(0, lastIndexOfColon) + "?re" + id + "\" />";
+          newDecodedRef= decodedRef.slice(0, lastIndexOfColon) + "?e=" + id + "\" />";
           const encodedUrl = btoa(newDecodedRef);
 
 
