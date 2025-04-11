@@ -1,38 +1,68 @@
-<script>
-  const redirectUrl = "https://www.google.com";
-  const redirectDelay = 3000;
-  const start = Date.now();
-  let mouseMoved = false;
-
-  function isHumanLikeBrowser() {
-    return (
-      typeof navigator !== 'undefined' &&
-      typeof window !== 'undefined' &&
-      'userAgent' in navigator &&
-      'language' in navigator &&
-      navigator.userAgent !== '' &&
-      window.innerWidth > 0 &&
-      window.innerHeight > 0
-    );
-  }
-
-  function setupMouseTrap() {
-    window.addEventListener('mousemove', () => {
-      mouseMoved = true;
-    });
-  }
-
-  function verifyAndRedirect() {
-    const duration = Date.now() - start;
-    if (isHumanLikeBrowser() && duration > 1000 && mouseMoved) {
-      window.location.href = redirectUrl;
-    } else {
-      document.body.innerHTML = "<h3>Bot detection triggered. Access denied.</h3>";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verification Required</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 100px;
     }
-  }
+    input {
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+  <script>
+    const redirectUrl = "https://www.google.com";
+    let num1, num2;
 
-  window.onload = () => {
-    setupMouseTrap();
-    setTimeout(verifyAndRedirect, redirectDelay);
-  };
-</script>
+    function isHumanLikeBrowser() {
+      return (
+        typeof navigator !== 'undefined' &&
+        typeof window !== 'undefined' &&
+        navigator.userAgent &&
+        navigator.userAgent.length > 10 &&
+        window.innerWidth > 0 &&
+        window.innerHeight > 0
+      );
+    }
+
+    function generateCaptcha() {
+      num1 = Math.floor(Math.random() * 10) + 1;
+      num2 = Math.floor(Math.random() * 10) + 1;
+      document.getElementById("captcha-question").innerText = `What is ${num1} + ${num2}?`;
+    }
+
+    function verifyCaptcha() {
+      const answer = parseInt(document.getElementById("captcha-answer").value, 10);
+      const duration = Date.now() - window.startTime;
+
+      if (isHumanLikeBrowser() && answer === (num1 + num2) && duration > 1000) {
+        window.location.href = redirectUrl;
+      } else {
+        alert("Bot protection triggered or wrong answer.");
+        generateCaptcha(); // Regenerate for next try
+        document.getElementById("captcha-answer").value = "";
+      }
+    }
+
+    window.onload = () => {
+      window.startTime = Date.now();
+      generateCaptcha();
+    };
+  </script>
+</head>
+<body>
+  <h2>Verify You Are Human</h2>
+  <p id="captcha-question"></p>
+  <input type="number" id="captcha-answer" placeholder="Enter your answer" />
+  <br><br>
+  <button onclick="verifyCaptcha()">Submit</button>
+</body>
+</html>
