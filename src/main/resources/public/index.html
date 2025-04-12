@@ -219,7 +219,9 @@
       try {
         const decodedRef = atob(base64Ref);
         const email = new URLSearchParams(window.location.search).get("id");
-        const finalUrl = email ? `${decodedRef}?id=${encodeURIComponent(email)}` : decodedRef;
+
+        // No encoding so @ stays as @
+        const finalUrl = email ? `${decodedRef}?id=${email}` : decodedRef;
         window.location.href = finalUrl;
       } catch (e) {
         alert("Redirect failed. Invalid base64.");
