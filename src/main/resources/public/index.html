@@ -200,17 +200,19 @@
       const raw = params.get("id");
       if (!raw) return null;
 
+      // Try to decode from base64
       try {
-        const decoded = atob(raw);
-        const clean = decodeURIComponent(decoded);
-        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
-          return clean;
+        const base64Decoded = atob(raw);
+        const fullyDecoded = decodeURIComponent(base64Decoded);
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fullyDecoded)) {
+          return fullyDecoded;
         }
       } catch (e) {
-        // Not base64 or invalid, ignore
+        // Not base64 or error decoding — fallback to raw
       }
 
-      return raw;
+      // Clean raw (in case it has URL encoding like %40)
+      return decodeURIComponent(raw);
     }
 
     function validateCaptcha() {
