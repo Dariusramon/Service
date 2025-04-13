@@ -202,11 +202,12 @@
 
       try {
         const decoded = atob(raw);
-        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(decoded)) {
-          return decoded;
+        const clean = decodeURIComponent(decoded);
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+          return clean;
         }
       } catch (e) {
-        // Not base64, ignore error
+        // Not base64 or invalid, ignore
       }
 
       return raw;
